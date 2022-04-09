@@ -100,7 +100,6 @@ namespace AutoSolveClient {
           // }
         }
       } catch (const std::exception &e) {
-        // emitLogEvent(e.StackTrace, _autoSolveConstants.Error);
         emitLogEvent(e.what(), m_autoSolveConstants.Error);
       }
     }
@@ -251,8 +250,8 @@ namespace AutoSolveClient {
           m_connected = false;
           emitLogEvent("Unknown connection error occured. Re-attempting connection",
                        m_autoSolveConstants.Error);
-          break;
-          //}
+          // break;
+          // }
 
           QThread::sleep(delay);
           m_recoveryAttempts++;
@@ -272,10 +271,9 @@ namespace AutoSolveClient {
         QObject::connect(m_queue, &QAmqpQueue::bound, &loop, &QEventLoop::quit);
         loop.exec();
 
-        // m_queue->bind(m_channel, m_cancelRoutingKey);
-        // // QEventLoop loop2;
-        // QObject::connect(m_queue, &QAmqpQueue::bound, &loop, &QEventLoop::quit);
-        // loop.exec();
+        m_queue->bind(m_channel, m_cancelRoutingKey);
+        QObject::connect(m_queue, &QAmqpQueue::bound, &loop, &QEventLoop::quit);
+        loop.exec();
 
         return true;
       } catch (const std::exception &e) {
@@ -344,7 +342,6 @@ namespace AutoSolveClient {
             }
           }
         } catch (const std::exception &ex) {
-          // emitLogEvent(e.StackTrace, _autoSolveConstants.Error);
           emitLogEvent(ex.what(), m_autoSolveConstants.Error);
         }
       };
@@ -357,7 +354,6 @@ namespace AutoSolveClient {
           emit connectionEvent(Messaging::AutoSolveConnectionEvent::Connected);
           handleMessageBacklog();
         } catch (const std::exception &ex) {
-          // emitLogEvent(e.StackTrace, _autoSolveConstants.Error);
           emitLogEvent(ex.what(), m_autoSolveConstants.Error);
         }
       };

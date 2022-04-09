@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.14...3.22)
 
 # Note: update this to your new project's name and version
 project(
-  Greeter
+  AutoSolve
   VERSION 1.0
   LANGUAGES CXX
 )
@@ -27,10 +27,10 @@ include(cmake/CPM.cmake)
 CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.8.0")
 
 CPMAddPackage(
-  NAME fmt
-  GIT_TAG 8.1.1
-  GITHUB_REPOSITORY fmtlib/fmt
-  OPTIONS "FMT_INSTALL YES" # create an installable target
+  NAME qamqp
+  GIT_TAG v0.6.2
+  GITHUB_REPOSITORY frysee/qamqp
+  OPTIONS "WITH_TUTORIALS OFF" # create an installable target
 )
 
 # ---- Add source files ----
@@ -38,23 +38,40 @@ CPMAddPackage(
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
 # automatically. Keep that in mind when changing files, or explicitly mention them here.
 file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
-file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
 # ---- Create library ----
 
-# Note: for header-only libraries change all PUBLIC flags to INTERFACE and create an interface
-# target: add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME} ${headers} ${sources})
-set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
+add_library(${PROJECT_NAME} INTERFACE
+  include/autosolve/exceptions/AutoSolveExceptions.h
+  include/autosolve/messaging/AutoSolveBacklogMessage.h
+  include/autosolve/messaging/AutoSolveCancelMessage.h
+  include/autosolve/messaging/AutoSolveCancelResponse.h
+  include/autosolve/messaging/AutoSolveCancelResponseArray.h
+  include/autosolve/messaging/AutoSolveConnectionEvent.h
+  include/autosolve/messaging/AutoSolveMessage.h
+  include/autosolve/messaging/AutoSolveResponse.h
+  include/autosolve/messaging/IAutoSolveMessage.h
+  include/autosolve/AutoSolve.h
+  include/autosolve/AutoSolveConnectResultType.h
+  include/autosolve/AutoSolveConstants.h
+)
+set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 LINKER_LANGUAGE CXX)
 
 # being a cross-platform target, we enforce standards conformance on MSVC
-target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
+target_compile_options(${PROJECT_NAME} INTERFACE "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
+
+find_package(Qt6 REQUIRED COMPONENTS Network)
+if (${Qt6_FOUND})
+    message("Found Qt " ${Qt6_VERSION}) 
+else()
+    message("Couldn't find Qt6")
+endif()
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+target_link_libraries(${PROJECT_NAME} INTERFACE qamqp::qamqp Qt6::Core Qt6::Network)
 
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  ${PROJECT_NAME} INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
 )
 
@@ -74,5 +91,5 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
   COMPATIBILITY SameMajorVersion
-  DEPENDENCIES "fmt 8.1.1"
+  DEPENDENCIES "qamqp 0.6.0"
 )

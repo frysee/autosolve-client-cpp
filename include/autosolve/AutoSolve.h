@@ -2,6 +2,7 @@
 
 #include "AutoSolveConnectResultType.h"
 #include "AutoSolveConstants.h"
+#include "AutoSolveGlobal.h"
 #include "exceptions/AutoSolveExceptions.h"
 #include "messaging/AutoSolveBacklogMessage.h"
 #include "messaging/AutoSolveCancelMessage.h"
@@ -25,7 +26,7 @@
 #include <QThread>
 
 namespace AutoSolveClient {
-  class AutoSolve : public QObject {
+  class AUTOSOLVE_EXPORT AutoSolve : public QObject {
     Q_OBJECT
 
     QString m_accessToken;

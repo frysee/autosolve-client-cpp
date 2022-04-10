@@ -4,9 +4,10 @@
 
 #include <string>
 
-// TEST_CASE("AutoSolve") {
-//   // TODO
-// }
+TEST_CASE("AutoSolve") {
+  using namespace AutoSolveClient;
+  AutoSolve as(nullptr, "", "", "", true, false);
+}
 
 TEST_CASE("AutoSolve version") {
   static_assert(std::string_view(AUTOSOLVE_VERSION) == std::string_view("1.0"));
